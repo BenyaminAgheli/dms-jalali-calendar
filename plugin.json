@@ -1,0 +1,10 @@
+{
+    "id": "JalaliCalendar",
+    "name": "Jalali Test",
+    "description": "Simple Test Widget",
+    "version": "1.0.0",
+    "author": "Benyamin",
+    "icon": "calendar_today",
+    "type": "widget",
+    "component": "./JalaliWidget.qml"
+}
