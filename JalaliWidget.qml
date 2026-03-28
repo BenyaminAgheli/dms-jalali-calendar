@@ -8,7 +8,6 @@ import qs.Modules.Plugins
 PluginComponent {
     id: root
 
-    // 1. The Property you want to be live
     property string jalaliDate: pluginData.jalaliDate
     Process {
             id: jdateProcess
@@ -19,16 +18,6 @@ PluginComponent {
             }
     }
 
-    // 3. The Heartbeat: Refresh every 60 seconds
-//    Timer {
-//        interval: 60000
-//        running: true
-//        repeat: true
-//        triggeredOnStart: true
-//        onTriggered: jdateProcess.start()
-//    }
-
-    // 4. The Bar Pill (The Name of the Widget)
     horizontalBarPill: Component {
         Row {
             spacing: 8
@@ -48,4 +37,64 @@ PluginComponent {
             }
         }
     }
+    popoutContent: Component {
+        PopoutComponent {
+            id: popoutColumn
+
+            property var monthCalendar: []
+            
+Process {
+    id: jcalProcess
+    command: ["sh", "-c", "jcal"]
+    running: true
+
+    onStarted: {
+        popoutColumn.monthCalendar = []
+    }
+
+    stdout: SplitParser {
+        onRead: (line) => {
+            if (!line) return
+
+            let parts = line.trim().split(/\s+/)
+
+            // 👇 مهم: آرایه جدید بساز (نه push)
+            popoutColumn.monthCalendar =
+                popoutColumn.monthCalendar.concat(parts)
+        }
+    }
+}
+
+            Item {
+                width: parent.width
+                implicitHeight: root.popoutHeight - popoutColumn.headerHeight -
+                               popoutColumn.detailsHeight - Theme.spacingXL
+
+                DankGridView {
+                    anchors.fill: parent
+                    cellWidth: 50
+                    cellHeight: 50
+                    model: popoutColumn.monthCalendar
+
+                    delegate: StyledRect {
+                        width: 45
+                        height: 45
+                        radius: Theme.cornerRadius
+                        color: emojiMouse.containsMouse ?
+                               Theme.surfaceContainerHighest :
+                               Theme.surfaceContainerHigh
+
+                        StyledText {
+                            anchors.centerIn: parent
+                            text: modelData
+                            font.pixelSize: Theme.fontSizeXLarge
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    popoutWidth: 400
+    popoutHeight: 500
 }
