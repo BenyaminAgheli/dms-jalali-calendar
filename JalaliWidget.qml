@@ -8,13 +8,29 @@ import qs.Modules.Plugins
 PluginComponent {
     id: root
 
-    layerNamespacePlugin: "shamsi-calendar"
+    // 1. The Property you want to be live
+    property string jalaliDate: pluginData.jalaliDate
+    Process {
+            id: jdateProcess
+            command: ["sh", "-c", "jdate | awk '{print $1,$2,$3}'"]
+            running: true            
+            stdout: SplitParser {
+                onRead: (line) =>{ root.jalaliDate = line.trim()}
+            }
+    }
 
-    property string jalaliDate: "1405/01/06" 
+    // 3. The Heartbeat: Refresh every 60 seconds
+//    Timer {
+//        interval: 60000
+//        running: true
+//        repeat: true
+//        triggeredOnStart: true
+//        onTriggered: jdateProcess.start()
+//    }
 
+    // 4. The Bar Pill (The Name of the Widget)
     horizontalBarPill: Component {
         Row {
-            id: horizontalRow
             spacing: 8
             
             DankIcon {
@@ -31,31 +47,5 @@ PluginComponent {
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
-    }
-
-    verticalBarPill: Component {
-        Column {
-            spacing: 4
-            anchors.horizontalCenter: parent.horizontalCenter
-            
-            DankIcon {
-                name: "event"
-                size: 16
-                color: Theme.primary
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-
-            StyledText {
-                text: root.jalaliDate
-                font.pixelSize: 11
-                color: Theme.surfaceVariantText
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
-        }
-    }
-
-
-    Component.onCompleted: {
-        console.log("Jalali Widget Loaded");
     }
 }
