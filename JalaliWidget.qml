@@ -55,7 +55,7 @@ PluginComponent {
 
             property var monthDays: []
             property string monthTitle: ""
-            property var weekDays: ["ش", "ی", "د", "س", "چ", "پ", "ج"]
+            property var weekDays: ["Sha","Yek","Dos","Ses","Cha","Pan","Jom"]
             
             property int lineIndex: 0
             property bool isFirstWeek: true
