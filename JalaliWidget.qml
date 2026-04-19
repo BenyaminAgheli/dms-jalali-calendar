@@ -67,6 +67,18 @@ PluginComponent {
         }
     }
 
+    // 5. حذف یادداشت (جدید)
+    Process {
+        id: deleteProcess
+        property string textToDelete: ""
+        // این دستور خطی که دقیقاً با متن یادداشت برابر است را پیدا و پاک می‌کند
+        command: ["sh", "-c", "sed -i '/^" + textToDelete + "$/d' ~/.local/share/jalali_reminders/day_" + root.selectedDay + ".txt"]
+        onExited: {
+            checkNotesProcess.running = true;
+            readNotesProcess.running = true;
+        }
+    }
+
     horizontalBarPill: Component {
         Row {
             spacing: 8
@@ -127,7 +139,6 @@ PluginComponent {
                 width: parent.width
                 implicitHeight: root.popoutHeight - 60 
 
-                // --- صفحه تقویم ---
                 Column {
                     id: viewCalendar
                     visible: !root.isDetailsView
@@ -174,14 +185,12 @@ PluginComponent {
                     }
                 }
 
-                // --- صفحه جزئیات ---
                 Column {
                     id: viewDetails
                     visible: root.isDetailsView
                     anchors.fill: parent
                     spacing: 15
 
-                    // هدر
                     Item {
                         width: parent.width; height: 40
                         StyledRect {
@@ -198,7 +207,6 @@ PluginComponent {
                         }
                     }
 
-                    // ورودی
                     Row {
                         width: parent.width; height: 40; spacing: 10
                         StyledRect {
@@ -231,7 +239,6 @@ PluginComponent {
                         }
                     }
 
-                    // لیست
                     Flickable {
                         width: parent.width; height: parent.height - 120; contentHeight: notesListCol.implicitHeight; clip: true
                         Column {
@@ -239,10 +246,40 @@ PluginComponent {
                             Repeater {
                                 model: root.dayNotesList
                                 delegate: StyledRect {
-                                    width: parent.width; height: Math.max(40, txtNote.implicitHeight + 16); color: Theme.surfaceVariant; radius: 6
-                                    StyledText {
-                                        id: txtNote; text: modelData; anchors.fill: parent; anchors.margins: 10
-                                        horizontalAlignment: Text.AlignRight; wrapMode: Text.WordWrap; color: Theme.surfaceVariantText
+                                    width: parent.width; height: Math.max(45, txtNote.implicitHeight + 16); color: Theme.surfaceVariant; radius: 6
+                                    
+                                    Row {
+                                        anchors.fill: parent
+                                        anchors.margins: 8
+                                        spacing: 10
+
+                                        // دکمه حذف (آیکون ضربدر)
+                                        Item {
+                                            width: 30; height: 30; anchors.verticalCenter: parent.verticalCenter
+                                            DankIcon { name: "close"; size: 18; color: Theme.error; anchors.centerIn: parent; opacity: 0.7 }
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                onClicked: {
+                                                    deleteProcess.textToDelete = modelData;
+                                                    deleteProcess.running = true;
+                                                }
+                                            }
+                                        }
+
+                                        // متن یادداشت (کلیک روی متن هم حذف می‌کند)
+                                        StyledText {
+                                            id: txtNote; text: modelData
+                                            width: parent.width - 40; anchors.verticalCenter: parent.verticalCenter
+                                            horizontalAlignment: Text.AlignRight; wrapMode: Text.WordWrap; color: Theme.surfaceVariantText
+                                            
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                onClicked: {
+                                                    deleteProcess.textToDelete = modelData;
+                                                    deleteProcess.running = true;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
